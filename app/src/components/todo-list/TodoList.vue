@@ -55,8 +55,9 @@ onMounted(() => {
 
 <template>
   <div>
-    <h2>{{ LABELS_TODO.TITLE }}</h2>
-    <button @click="isModalOpen = true">{{ LABELS_TODO.ADD }}</button>
+    <button class="todolist-add" @click="isModalOpen = true">
+      {{ LABELS_TODO.ADD }}
+    </button>
 
     <table>
       <thead>
@@ -85,10 +86,12 @@ onMounted(() => {
           <td>{{ todo.assignee || LABELS_ASSIGNEE.UNSET }}</td>
           <td>{{ new Date(todo.createdAt).toLocaleString() }}</td>
           <td>
-            <button>{{ LABELS_TODO.EDIT }}</button>
-            <button @click="removeTodo(todo.id)">
-              {{ LABELS_TODO.DELETE }}
-            </button>
+            <div class="todolist-actions">
+              <button class="todolist-edit">{{ LABELS_TODO.EDIT }}</button>
+              <button class="todolist-delete" @click="removeTodo(todo.id)">
+                {{ LABELS_TODO.DELETE }}
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
