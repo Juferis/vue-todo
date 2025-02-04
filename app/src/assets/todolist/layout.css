@@ -25,3 +25,15 @@ h2 {
 .todolist-toggle {
   margin-left: 10px;
 }
+
+.top-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 8px;
+  font-size: 14px;
+}
