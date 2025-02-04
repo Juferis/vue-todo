@@ -53,8 +53,12 @@ const saveTodo = () => {
       <input type="date" v-model="deadline" />
 
       <div class="button-group">
-        <button @click="saveTodo">{{ LABELS_MODAL.SAVE }}</button>
-        <button @click="$emit('close')">{{ LABELS_MODAL.CANCEL }}</button>
+        <button class="todolist-save" @click="saveTodo">
+          {{ LABELS_MODAL.SAVE }}
+        </button>
+        <button class="todolist-secondary" @click="$emit('close')">
+          {{ LABELS_MODAL.CANCEL }}
+        </button>
       </div>
     </div>
   </div>
