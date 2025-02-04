@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { TodoStatus, type Todo } from './types';
+import TodoModal from './TodoModal.vue';
 
 const STORAGE_KEY = 'todos';
 
 const todos = ref<Todo[]>([]);
-const newTodo = ref('');
+const isModalOpen = ref(false);
 
 const loadTodos = () => {
   const savedTodos = localStorage.getItem(STORAGE_KEY);
@@ -18,21 +19,23 @@ const saveTodos = () => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(todos.value));
 };
 
-const addTodo = () => {
-  if (newTodo.value.trim() === '') return; // 빈 입력 방지
-
+const addTodo = (data: {
+  text: string;
+  assignee: string;
+  deadline: string;
+}) => {
   const newTask: Todo = {
     id: crypto.randomUUID(),
-    text: newTodo.value,
+    text: data.text,
     status: TodoStatus.INCOMPLETE,
-    assignee: '',
-    deadline: '',
-    createdAt: new Date().toISOString(), // 현재 시간 저장
+    assignee: data.assignee,
+    deadline: data.deadline,
+    createdAt: new Date().toISOString(),
   };
 
   todos.value.push(newTask);
   saveTodos();
-  newTodo.value = '';
+  isModalOpen.value = false;
 };
 
 const removeTodo = (id: string) => {
@@ -48,14 +51,7 @@ onMounted(() => {
 <template>
   <div>
     <h2>Todo List</h2>
-    <div>
-      <input
-        v-model="newTodo"
-        @keyup.enter="addTodo"
-        placeholder="할 일을 입력하세요"
-      />
-      <button @click="addTodo">추가</button>
-    </div>
+    <button @click="isModalOpen = true">추가</button>
 
     <table>
       <thead>
@@ -74,15 +70,21 @@ onMounted(() => {
           <td>{{ index + 1 }}</td>
           <td>{{ todo.text }}</td>
           <td>{{ todo.status === 1 ? '완료' : '미완료' }}</td>
-          <td>{{ todo.deadline }}</td>
-          <td>{{ todo.assignee }}</td>
-          <td>{{ todo.createdAt }}</td>
+          <td>{{ todo.deadline || '미설정' }}</td>
+          <td>{{ todo.assignee || '미정' }}</td>
+          <td>{{ new Date(todo.createdAt).toLocaleString() }}</td>
           <td>
-            <button>수정</button
-            ><button @click="removeTodo(todo.id)">삭제</button>
+            <button>수정</button>
+            <button @click="removeTodo(todo.id)">삭제</button>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <TodoModal
+      v-if="isModalOpen"
+      @save="addTodo"
+      @close="isModalOpen = false"
+    />
   </div>
 </template>
