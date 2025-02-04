@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { TodoStatus, type Todo } from './types';
+import { assignees, TodoStatus, type Todo } from './types';
 import {
   STORAGE_KEY,
   LABELS_TODO,
@@ -19,6 +19,43 @@ const currentPage = ref(1);
 const itemsPerPage = 10;
 const isInfiniteScroll = ref(false);
 const visibleCount = ref(10);
+const selectedAssignee = ref('ALL');
+
+const filteredTodos = computed(() => {
+  if (selectedAssignee.value === 'ALL') return todos.value;
+  return todos.value.filter((todo) => todo.assignee === selectedAssignee.value);
+});
+
+const paginatedTodos = computed(() => {
+  const list = filteredTodos.value;
+  if (isInfiniteScroll.value) return list.slice(0, visibleCount.value);
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return list.slice(start, start + itemsPerPage);
+});
+
+const totalPages = computed(() =>
+  Math.ceil(filteredTodos.value.length / itemsPerPage)
+);
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const handleScroll = () => {
+  if (!isInfiniteScroll.value) return;
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+  if (scrollTop + clientHeight >= scrollHeight - 50) {
+    visibleCount.value += 10;
+  }
+};
 
 const loadTodos = () => {
   const savedTodos = localStorage.getItem(STORAGE_KEY);
@@ -72,34 +109,6 @@ const editTodo = (todo: Todo) => {
   isModalOpen.value = true;
 };
 
-const paginatedTodos = computed(() => {
-  if (isInfiniteScroll.value) return todos.value.slice(0, visibleCount.value);
-  const start = (currentPage.value - 1) * itemsPerPage;
-  return todos.value.slice(start, start + itemsPerPage);
-});
-
-const totalPages = computed(() => Math.ceil(todos.value.length / itemsPerPage));
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-};
-
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-};
-
-const handleScroll = () => {
-  if (!isInfiniteScroll.value) return;
-  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-  if (scrollTop + clientHeight >= scrollHeight - 50) {
-    visibleCount.value += 10;
-  }
-};
-
 onMounted(() => {
   loadTodos();
   window.addEventListener('scroll', handleScroll);
@@ -108,28 +117,36 @@ onMounted(() => {
 
 <template>
   <div>
-    <button
-      class="todolist-add"
-      @click="
-        editingTodo = null;
-        isModalOpen = true;
-      "
-    >
-      {{ LABELS_TODO.ADD }}
-    </button>
-    <button
-      class="todolist-toggle"
-      @click="
-        isInfiniteScroll = !isInfiniteScroll;
-        visibleCount = 10;
-      "
-    >
-      {{
-        isInfiniteScroll
-          ? LABELS_INFIITESCROLL.INFIITE
-          : LABELS_INFIITESCROLL.NOTINFIITE
-      }}
-    </button>
+    <div class="top-controls">
+      <button
+        class="todolist-add"
+        @click="
+          editingTodo = null;
+          isModalOpen = true;
+        "
+      >
+        {{ LABELS_TODO.ADD }}
+      </button>
+      <button
+        class="todolist-toggle"
+        @click="
+          isInfiniteScroll = !isInfiniteScroll;
+          visibleCount = 10;
+        "
+      >
+        {{
+          isInfiniteScroll
+            ? LABELS_INFIITESCROLL.INFIITE
+            : LABELS_INFIITESCROLL.NOTINFIITE
+        }}
+      </button>
+      <select v-model="selectedAssignee" class="filter-select">
+        <option value="ALL">전체</option>
+        <option v-for="assignee in assignees" :key="assignee" :value="assignee">
+          {{ assignee }}
+        </option>
+      </select>
+    </div>
 
     <table>
       <thead>
