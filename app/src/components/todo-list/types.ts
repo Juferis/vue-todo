@@ -4,7 +4,7 @@ export enum TodoStatus {
 }
 
 export interface Todo {
-    id: number;
+    id: string;
     text: string;
     status: TodoStatus;
     assignee: string;
