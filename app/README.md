@@ -1,5 +1,13 @@
-# Vue 3 + TypeScript + Vite
+# Vue Todo List
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## Project Overview
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+> Vue.js + TypeScript + Vite를 활용하여 간단한 Todo List 애플리케이션
+
+## Features
+
+[] 할 일 추가/수정, 삭제, 완료/미완료 상태 변경 기능
+[] 상태/담당자 필터링 기능
+[] 할 일 목록은 로컬 스토리지에 저장
+[] 페이지네이션 기능
+[] CSS를 활용하여 간단하게 스타일링
