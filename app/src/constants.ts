@@ -27,3 +27,8 @@ export const LABELS_MODAL = {
     CANCEL: "취소",
     SAVE: "저장",
 };
+
+export const LABELS_INFIITESCROLL = {
+    INFIITE: '페이지네이션 모드',
+    NOTINFIITE: '전체 보기 모드'
+}

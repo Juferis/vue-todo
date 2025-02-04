@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { type Todo } from './types';
+import { ref, computed, onMounted } from 'vue';
+import { TodoStatus, type Todo } from './types';
 import {
   STORAGE_KEY,
   LABELS_TODO,
@@ -13,6 +13,11 @@ import TodoModal from './TodoModal.vue';
 const todos = ref<Todo[]>([]);
 const isModalOpen = ref(false);
 const editingTodo = ref<Todo | null>(null);
+
+const currentPage = ref(1);
+const itemsPerPage = 10;
+const isInfiniteScroll = ref(false);
+const visibleCount = ref(10);
 
 const loadTodos = () => {
   const savedTodos = localStorage.getItem(STORAGE_KEY);
@@ -29,12 +34,11 @@ const addTodo = (data: {
   text: string;
   assignee: string;
   deadline: string;
-  status: number;
 }) => {
   const newTask: Todo = {
     id: crypto.randomUUID(),
     text: data.text,
-    status: data.status,
+    status: TodoStatus.INCOMPLETE,
     assignee: data.assignee,
     deadline: data.deadline,
     createdAt: new Date().toISOString(),
@@ -57,18 +61,47 @@ const updateTodo = (
   editingTodo.value = null;
 };
 
-const editTodo = (todo: Todo) => {
-  editingTodo.value = { ...todo };
-  isModalOpen.value = true;
-};
-
 const removeTodo = (id: string) => {
   todos.value = todos.value.filter((todo) => todo.id !== id);
   saveTodos();
 };
 
+const editTodo = (todo: Todo) => {
+  editingTodo.value = { ...todo };
+  isModalOpen.value = true;
+};
+
+const paginatedTodos = computed(() => {
+  if (isInfiniteScroll.value) return todos.value.slice(0, visibleCount.value);
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return todos.value.slice(start, start + itemsPerPage);
+});
+
+const totalPages = computed(() => Math.ceil(todos.value.length / itemsPerPage));
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const handleScroll = () => {
+  if (!isInfiniteScroll.value) return;
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+  if (scrollTop + clientHeight >= scrollHeight - 50) {
+    visibleCount.value += 10;
+  }
+};
+
 onMounted(() => {
   loadTodos();
+  window.addEventListener('scroll', handleScroll);
 });
 </script>
 
@@ -82,6 +115,15 @@ onMounted(() => {
       "
     >
       {{ LABELS_TODO.ADD }}
+    </button>
+    <button
+      class="todolist-toggle"
+      @click="
+        isInfiniteScroll = !isInfiniteScroll;
+        visibleCount = 10;
+      "
+    >
+      {{ isInfiniteScroll ? '페이지네이션 모드' : '무한 스크롤 모드' }}
     </button>
 
     <table>
@@ -97,7 +139,7 @@ onMounted(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(todo, index) in todos" :key="todo.id">
+        <tr v-for="(todo, index) in paginatedTodos" :key="todo.id">
           <td>{{ index + 1 }}</td>
           <td>{{ todo.text }}</td>
           <td>
@@ -123,6 +165,14 @@ onMounted(() => {
         </tr>
       </tbody>
     </table>
+
+    <div v-if="!isInfiniteScroll" class="todolist-pagination">
+      <button @click="prevPage" :disabled="currentPage === 1">이전</button>
+      <span>{{ currentPage }} / {{ totalPages }}</span>
+      <button @click="nextPage" :disabled="currentPage === totalPages">
+        다음
+      </button>
+    </div>
 
     <TodoModal
       v-if="isModalOpen"
