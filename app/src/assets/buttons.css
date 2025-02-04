@@ -1,0 +1,63 @@
+button {
+  padding: 8px 12px;
+  cursor: pointer;
+  border: none;
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.todolist-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+button:hover {
+  background-color: #388e3c;
+}
+
+button.todolist-add {
+  display: block;
+  margin: 10px 0;
+  text-align: left;
+}
+
+button.todolist-edit {
+  background-color: #2196f3;
+}
+
+button.todolist-edit:hover {
+  background-color: #1976d2;
+}
+
+button.todolist-delete {
+  background-color: #f44336;
+}
+
+button.todolist-delete:hover {
+  background-color: #d32f2f;
+}
+
+button.todolist-secondary {
+  background-color: var(--secondary-color);
+}
+
+button.todolist-secondary:hover {
+  background-color: #b71c1c;
+}
+
+.dark-mode-toggle {
+  padding: 8px 12px;
+  width: 45px;
+  height: 40px;
+  cursor: pointer;
+  border: none;
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out;
+}
