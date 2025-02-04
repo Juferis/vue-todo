@@ -30,5 +30,5 @@ export const LABELS_MODAL = {
 
 export const LABELS_INFIITESCROLL = {
     INFIITE: '페이지네이션 모드',
-    NOTINFIITE: '전체 보기 모드'
+    NOTINFIITE: '무한 스크롤 모드'
 }

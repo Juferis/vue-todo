@@ -7,6 +7,7 @@ import {
   LABELS_STATUS,
   LABELS_DEADLINE,
   LABELS_ASSIGNEE,
+  LABELS_INFIITESCROLL,
 } from '../../constants';
 import TodoModal from './TodoModal.vue';
 
@@ -123,7 +124,11 @@ onMounted(() => {
         visibleCount = 10;
       "
     >
-      {{ isInfiniteScroll ? '페이지네이션 모드' : '무한 스크롤 모드' }}
+      {{
+        isInfiniteScroll
+          ? LABELS_INFIITESCROLL.INFIITE
+          : LABELS_INFIITESCROLL.NOTINFIITE
+      }}
     </button>
 
     <table>
