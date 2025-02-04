@@ -10,3 +10,30 @@ h2 {
   font-size: 40px;
   font-weight: 600;
 }
+
+.todolist-table-button-wrap {
+  display: inline;
+}
+
+.todolist-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.todolist-toggle {
+  margin-left: 10px;
+}
+
+.top-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 8px;
+  font-size: 14px;
+}

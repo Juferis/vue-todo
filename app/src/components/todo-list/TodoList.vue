@@ -1,18 +1,77 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { type Todo } from './types';
+import { ref, computed, onMounted } from 'vue';
+import { assignees, TodoStatus, type Todo } from './types';
 import {
   STORAGE_KEY,
   LABELS_TODO,
   LABELS_STATUS,
   LABELS_DEADLINE,
   LABELS_ASSIGNEE,
+  LABELS_INFIITESCROLL,
 } from '../../constants';
 import TodoModal from './TodoModal.vue';
 
 const todos = ref<Todo[]>([]);
 const isModalOpen = ref(false);
 const editingTodo = ref<Todo | null>(null);
+
+const currentPage = ref(1);
+const itemsPerPage = 10;
+const isInfiniteScroll = ref(false);
+const visibleCount = ref(10);
+const selectedAssignee = ref('ALL');
+const selectedStatus = ref('ALL');
+
+const filteredTodos = computed(() => {
+  let filtered = todos.value;
+
+  if (selectedAssignee.value !== 'ALL') {
+    filtered = filtered.filter(
+      (todo) => todo.assignee === selectedAssignee.value
+    );
+  }
+
+  if (selectedStatus.value !== 'ALL') {
+    const statusValue =
+      selectedStatus.value === 'COMPLETE'
+        ? TodoStatus.COMPLETE
+        : TodoStatus.INCOMPLETE;
+    filtered = filtered.filter((todo) => todo.status === statusValue);
+  }
+
+  return filtered;
+});
+
+const paginatedTodos = computed(() => {
+  const list = filteredTodos.value;
+  if (isInfiniteScroll.value) return list.slice(0, visibleCount.value);
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return list.slice(start, start + itemsPerPage);
+});
+
+const totalPages = computed(() =>
+  Math.ceil(filteredTodos.value.length / itemsPerPage)
+);
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const handleScroll = () => {
+  if (!isInfiniteScroll.value) return;
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+  if (scrollTop + clientHeight >= scrollHeight - 50) {
+    visibleCount.value += 10;
+  }
+};
 
 const loadTodos = () => {
   const savedTodos = localStorage.getItem(STORAGE_KEY);
@@ -29,12 +88,11 @@ const addTodo = (data: {
   text: string;
   assignee: string;
   deadline: string;
-  status: number;
 }) => {
   const newTask: Todo = {
     id: crypto.randomUUID(),
     text: data.text,
-    status: data.status,
+    status: TodoStatus.INCOMPLETE,
     assignee: data.assignee,
     deadline: data.deadline,
     createdAt: new Date().toISOString(),
@@ -57,32 +115,65 @@ const updateTodo = (
   editingTodo.value = null;
 };
 
-const editTodo = (todo: Todo) => {
-  editingTodo.value = { ...todo };
-  isModalOpen.value = true;
-};
-
 const removeTodo = (id: string) => {
   todos.value = todos.value.filter((todo) => todo.id !== id);
   saveTodos();
 };
 
+const editTodo = (todo: Todo) => {
+  editingTodo.value = { ...todo };
+  isModalOpen.value = true;
+};
+
 onMounted(() => {
   loadTodos();
+  window.addEventListener('scroll', handleScroll);
 });
 </script>
 
 <template>
   <div>
-    <button
-      class="todolist-add"
-      @click="
-        editingTodo = null;
-        isModalOpen = true;
-      "
-    >
-      {{ LABELS_TODO.ADD }}
-    </button>
+    <div class="top-controls">
+      <button
+        class="todolist-add"
+        @click="
+          editingTodo = null;
+          isModalOpen = true;
+        "
+      >
+        {{ LABELS_TODO.ADD }}
+      </button>
+      <button
+        class="todolist-toggle"
+        @click="
+          isInfiniteScroll = !isInfiniteScroll;
+          visibleCount = 10;
+        "
+      >
+        {{
+          isInfiniteScroll
+            ? LABELS_INFIITESCROLL.INFIITE
+            : LABELS_INFIITESCROLL.NOTINFIITE
+        }}
+      </button>
+    </div>
+    <div>
+      <span>담당자</span>
+      <select v-model="selectedAssignee" class="filter-select">
+        <option value="ALL">전체</option>
+        <option v-for="assignee in assignees" :key="assignee" :value="assignee">
+          {{ assignee }}
+        </option>
+      </select>
+    </div>
+    <div>
+      <span>상태</span>
+      <select v-model="selectedStatus" class="filter-select">
+        <option value="ALL">전체</option>
+        <option value="COMPLETE">{{ LABELS_STATUS.COMPLETE }}</option>
+        <option value="INCOMPLETE">{{ LABELS_STATUS.INCOMPLETE }}</option>
+      </select>
+    </div>
 
     <table>
       <thead>
@@ -97,7 +188,7 @@ onMounted(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(todo, index) in todos" :key="todo.id">
+        <tr v-for="(todo, index) in paginatedTodos" :key="todo.id">
           <td>{{ index + 1 }}</td>
           <td>{{ todo.text }}</td>
           <td>
@@ -123,6 +214,14 @@ onMounted(() => {
         </tr>
       </tbody>
     </table>
+
+    <div v-if="!isInfiniteScroll" class="todolist-pagination">
+      <button @click="prevPage" :disabled="currentPage === 1">이전</button>
+      <span>{{ currentPage }} / {{ totalPages }}</span>
+      <button @click="nextPage" :disabled="currentPage === totalPages">
+        다음
+      </button>
+    </div>
 
     <TodoModal
       v-if="isModalOpen"
