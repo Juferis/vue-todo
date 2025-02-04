@@ -91,6 +91,7 @@ const saveTodo = () => {
       <div class="button-group">
         <button @click="saveTodo">{{ LABELS_MODAL.SAVE }}</button>
         <button
+          class="todolist-secondary"
           @click="
             $emit('close');
             clearTodoForm();
