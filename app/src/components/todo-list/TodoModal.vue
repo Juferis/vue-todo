@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import { ref, defineEmits } from 'vue';
+import {
+  LABELS_TODO,
+  LABELS_MODAL,
+  LABELS_ASSIGNEE,
+  LABELS_DEADLINE,
+} from '../../contants';
+import type { TodoInput } from './types';
 
 const emits = defineEmits(['save', 'close']);
 
@@ -7,16 +14,16 @@ const text = ref('');
 const selectedAssignee = ref('');
 const deadline = ref('');
 
-const assignees = ['김철수', '이영희', '박민수', '홍길동', '자기 자신'];
-
 const saveTodo = () => {
   if (!text.value.trim()) return;
 
-  emits('save', {
+  const newTodo: TodoInput = {
     text: text.value,
-    assignee: selectedAssignee.value || '미정',
-    deadline: deadline.value || '미설정',
-  });
+    assignee: selectedAssignee.value || LABELS_ASSIGNEE.UNSET,
+    deadline: deadline.value || LABELS_DEADLINE.UNSET,
+  };
+
+  emits('save', newTodo);
 
   text.value = '';
   selectedAssignee.value = '';
@@ -27,14 +34,17 @@ const saveTodo = () => {
 <template>
   <div class="modal-overlay">
     <div class="modal">
-      <h3>할 일 추가</h3>
-      <label>할 일</label>
-      <input v-model="text" placeholder="할 일을 입력하세요" />
+      <h3>{{ LABELS_MODAL.TITLE }}</h3>
+      <label>{{ LABELS_TODO.TITLE }}</label>
+      <input v-model="text" :placeholder="LABELS_TODO.INPUT_PLACEHOLDER" />
 
       <label>담당자</label>
       <select v-model="selectedAssignee">
-        <option value="">선택하세요</option>
-        <option v-for="(assignee, index) in assignees" :key="index">
+        <option value="">{{ LABELS_ASSIGNEE.UNSET }}</option>
+        <option
+          v-for="(assignee, index) in LABELS_ASSIGNEE.OPTIONS"
+          :key="index"
+        >
           {{ assignee }}
         </option>
       </select>
@@ -43,36 +53,9 @@ const saveTodo = () => {
       <input type="date" v-model="deadline" />
 
       <div class="button-group">
-        <button @click="saveTodo">저장</button>
-        <button @click="$emit('close')">취소</button>
+        <button @click="saveTodo">{{ LABELS_MODAL.SAVE }}</button>
+        <button @click="$emit('close')">{{ LABELS_MODAL.CANCEL }}</button>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 300px;
-}
-
-.button-group {
-  margin-top: 10px;
-  display: flex;
-  justify-content: space-between;
-}
-</style>

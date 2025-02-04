@@ -11,3 +11,11 @@ export interface Todo {
     deadline: string;
     createdAt: string;
 }
+
+export interface TodoInput {
+    text: string;
+    assignee: string;
+    deadline: string;
+}
+
+export const assignees = ["김철수", "이영희", "박민수", "홍길동", "나"];

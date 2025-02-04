@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { TodoStatus, type Todo } from './types';
+import {
+  STORAGE_KEY,
+  LABELS_TODO,
+  LABELS_STATUS,
+  LABELS_DEADLINE,
+  LABELS_ASSIGNEE,
+} from '../../contants';
 import TodoModal from './TodoModal.vue';
-
-const STORAGE_KEY = 'todos';
 
 const todos = ref<Todo[]>([]);
 const isModalOpen = ref(false);
@@ -50,8 +55,8 @@ onMounted(() => {
 
 <template>
   <div>
-    <h2>Todo List</h2>
-    <button @click="isModalOpen = true">추가</button>
+    <h2>{{ LABELS_TODO.TITLE }}</h2>
+    <button @click="isModalOpen = true">{{ LABELS_TODO.ADD }}</button>
 
     <table>
       <thead>
@@ -69,13 +74,21 @@ onMounted(() => {
         <tr v-for="(todo, index) in todos" :key="todo.id">
           <td>{{ index + 1 }}</td>
           <td>{{ todo.text }}</td>
-          <td>{{ todo.status === 1 ? '완료' : '미완료' }}</td>
-          <td>{{ todo.deadline || '미설정' }}</td>
-          <td>{{ todo.assignee || '미정' }}</td>
+          <td>
+            {{
+              todo.status === 1
+                ? LABELS_STATUS.COMPLETE
+                : LABELS_STATUS.INCOMPLETE
+            }}
+          </td>
+          <td>{{ todo.deadline || LABELS_DEADLINE.UNSET }}</td>
+          <td>{{ todo.assignee || LABELS_ASSIGNEE.UNSET }}</td>
           <td>{{ new Date(todo.createdAt).toLocaleString() }}</td>
           <td>
-            <button>수정</button>
-            <button @click="removeTodo(todo.id)">삭제</button>
+            <button>{{ LABELS_TODO.EDIT }}</button>
+            <button @click="removeTodo(todo.id)">
+              {{ LABELS_TODO.DELETE }}
+            </button>
           </td>
         </tr>
       </tbody>
