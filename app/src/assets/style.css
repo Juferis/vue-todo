@@ -1,9 +1,11 @@
 @import url('./theme.css');
-@import url('./layout.css');
-@import url('./buttons.css');
-@import url('./forms.css');
-@import url('./table.css');
-@import url('./modal.css');
+@import url('./reset.css');
+@import url('./todolist/layout.css');
+@import url('./todolist/buttons.css');
+@import url('./todolist/forms.css');
+@import url('./todolist/table.css');
+@import url('./todolist/modal.css');
+@import url('./todolist/input.css');
 
 body {
   font-family: 'Arial', sans-serif;
