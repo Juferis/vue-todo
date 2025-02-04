@@ -16,6 +16,7 @@ export interface TodoInput {
     text: string;
     assignee: string;
     deadline: string;
+    status: TodoStatus;
 }
 
 export const assignees = ["김철수", "이영희", "박민수", "홍길동", "나"];

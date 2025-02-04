@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import './assets/style.css';
 import TodoList from './components/todo-list/TodoList.vue';
-import { LABELS_TODO } from './contants';
+import { LABELS_TODO } from './constants';
 
 const isDarkMode = ref(false);
 

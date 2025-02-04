@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { TodoStatus, type Todo } from './types';
+import { type Todo } from './types';
 import {
   STORAGE_KEY,
   LABELS_TODO,
   LABELS_STATUS,
   LABELS_DEADLINE,
   LABELS_ASSIGNEE,
-} from '../../contants';
+} from '../../constants';
 import TodoModal from './TodoModal.vue';
 
 const todos = ref<Todo[]>([]);
 const isModalOpen = ref(false);
+const editingTodo = ref<Todo | null>(null);
 
 const loadTodos = () => {
   const savedTodos = localStorage.getItem(STORAGE_KEY);
@@ -28,19 +29,37 @@ const addTodo = (data: {
   text: string;
   assignee: string;
   deadline: string;
+  status: number;
 }) => {
   const newTask: Todo = {
     id: crypto.randomUUID(),
     text: data.text,
-    status: TodoStatus.INCOMPLETE,
+    status: data.status,
     assignee: data.assignee,
     deadline: data.deadline,
     createdAt: new Date().toISOString(),
   };
-
   todos.value.push(newTask);
   saveTodos();
   isModalOpen.value = false;
+};
+
+const updateTodo = (
+  data: { text: string; assignee: string; deadline: string; status: number },
+  id: string
+) => {
+  const index = todos.value.findIndex((todo) => todo.id === id);
+  if (index !== -1) {
+    todos.value[index] = { ...todos.value[index], ...data };
+    saveTodos();
+  }
+  isModalOpen.value = false;
+  editingTodo.value = null;
+};
+
+const editTodo = (todo: Todo) => {
+  editingTodo.value = { ...todo };
+  isModalOpen.value = true;
 };
 
 const removeTodo = (id: string) => {
@@ -55,7 +74,13 @@ onMounted(() => {
 
 <template>
   <div>
-    <button class="todolist-add" @click="isModalOpen = true">
+    <button
+      class="todolist-add"
+      @click="
+        editingTodo = null;
+        isModalOpen = true;
+      "
+    >
       {{ LABELS_TODO.ADD }}
     </button>
 
@@ -87,7 +112,9 @@ onMounted(() => {
           <td>{{ new Date(todo.createdAt).toLocaleString() }}</td>
           <td>
             <div class="todolist-actions">
-              <button class="todolist-edit">{{ LABELS_TODO.EDIT }}</button>
+              <button class="todolist-edit" @click="editTodo(todo)">
+                {{ LABELS_TODO.EDIT }}
+              </button>
               <button class="todolist-delete" @click="removeTodo(todo.id)">
                 {{ LABELS_TODO.DELETE }}
               </button>
@@ -99,8 +126,12 @@ onMounted(() => {
 
     <TodoModal
       v-if="isModalOpen"
-      @save="addTodo"
-      @close="isModalOpen = false"
+      :editedTodo="editingTodo"
+      @save="(data, id) => (id ? updateTodo(data, id) : addTodo(data))"
+      @close="
+        isModalOpen = false;
+        editingTodo = null;
+      "
     />
   </div>
 </template>
