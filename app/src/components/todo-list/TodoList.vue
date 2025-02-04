@@ -20,10 +20,26 @@ const itemsPerPage = 10;
 const isInfiniteScroll = ref(false);
 const visibleCount = ref(10);
 const selectedAssignee = ref('ALL');
+const selectedStatus = ref('ALL');
 
 const filteredTodos = computed(() => {
-  if (selectedAssignee.value === 'ALL') return todos.value;
-  return todos.value.filter((todo) => todo.assignee === selectedAssignee.value);
+  let filtered = todos.value;
+
+  if (selectedAssignee.value !== 'ALL') {
+    filtered = filtered.filter(
+      (todo) => todo.assignee === selectedAssignee.value
+    );
+  }
+
+  if (selectedStatus.value !== 'ALL') {
+    const statusValue =
+      selectedStatus.value === 'COMPLETE'
+        ? TodoStatus.COMPLETE
+        : TodoStatus.INCOMPLETE;
+    filtered = filtered.filter((todo) => todo.status === statusValue);
+  }
+
+  return filtered;
 });
 
 const paginatedTodos = computed(() => {
@@ -140,11 +156,22 @@ onMounted(() => {
             : LABELS_INFIITESCROLL.NOTINFIITE
         }}
       </button>
+    </div>
+    <div>
+      <span>담당자</span>
       <select v-model="selectedAssignee" class="filter-select">
         <option value="ALL">전체</option>
         <option v-for="assignee in assignees" :key="assignee" :value="assignee">
           {{ assignee }}
         </option>
+      </select>
+    </div>
+    <div>
+      <span>상태</span>
+      <select v-model="selectedStatus" class="filter-select">
+        <option value="ALL">전체</option>
+        <option value="COMPLETE">{{ LABELS_STATUS.COMPLETE }}</option>
+        <option value="INCOMPLETE">{{ LABELS_STATUS.INCOMPLETE }}</option>
       </select>
     </div>
 
